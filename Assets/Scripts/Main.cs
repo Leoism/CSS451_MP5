@@ -51,6 +51,11 @@ public class Main : MonoBehaviour
                 curSelected.gameObject.SetActive(false);
             }
             curSelected = t;
+            // 1 is cylinder
+            if(index == 1)
+            {
+              t.gameObject.GetComponent<CylinderRender>().GenerateCylinderVertices();
+            }
         }
     }
 }

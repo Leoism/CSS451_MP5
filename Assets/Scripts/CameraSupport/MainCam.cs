@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class MainCam : MonoBehaviour
 {
     public Transform LookPoint = null;
-    
+
     Vector3 LookPos = Vector3.zero;
     Vector3 LookOffset = Vector3.zero;
 
@@ -100,7 +100,7 @@ public class MainCam : MonoBehaviour
     void ProcessTumble(Vector3 delta)
     {
         Quaternion q1 = Quaternion.AngleAxis(delta.y, transform.right);
-        Quaternion q2 = Quaternion.AngleAxis(delta.x, transform.up);
+        Quaternion q2 = Quaternion.AngleAxis(-delta.x, transform.up);
 
         Matrix4x4 r = Matrix4x4.Rotate(q2);
         Matrix4x4 invP = Matrix4x4.TRS(-LookPoint.localPosition, Quaternion.identity, Vector3.one);

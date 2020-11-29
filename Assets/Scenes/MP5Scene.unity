@@ -121,6 +121,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &168702163 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9049191766167002151, guid: 3b7852a61a0427044bdb20c80ca9143f,
+    type: 3}
+  m_PrefabInstance: {fileID: 1383192562}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ca0078c8b2d1cb41bb974c10ab40b2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &269620089
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,6 +415,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 412778402}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &554904114 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9049191766167002151, guid: 3b7852a61a0427044bdb20c80ca9143f,
+    type: 3}
+  m_PrefabInstance: {fileID: 558211331}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ca0078c8b2d1cb41bb974c10ab40b2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &558211331
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -969,6 +993,7 @@ GameObject:
   - component: {fileID: 707902034}
   - component: {fileID: 707902036}
   - component: {fileID: 707902035}
+  - component: {fileID: 707902037}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -1035,6 +1060,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707902033}
   m_CullTransparentMesh: 0
+--- !u!114 &707902037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707902033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50b25014d07c91349b39add9621a58db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  verticesRenderer: {fileID: 1421593077}
+  resolution: {fileID: 168702163}
+  rotation: {fileID: 554904114}
+--- !u!1 &771391469 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7642044514722877287, guid: 3f023957edb04384b8dfd24f80131740,
+    type: 3}
+  m_PrefabInstance: {fileID: 3206514953994616844}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &776979577
 GameObject:
   m_ObjectHideFlags: 0
@@ -2480,6 +2526,7 @@ GameObject:
   - component: {fileID: 1421593075}
   - component: {fileID: 1421593074}
   - component: {fileID: 1421593073}
+  - component: {fileID: 1421593077}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -2562,6 +2609,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1421593077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421593072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad933fc3a8932f24ea6f14f6bd4f4f33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vertexPrefab: {fileID: 771391469}
+  resolutionVert: 10
 --- !u!224 &1438745992 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4062938375810314927, guid: 6fc0fd3ff5adeef439febc400f591bb1,
