@@ -89,7 +89,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 831205124896669392}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1
@@ -108,11 +108,11 @@ GameObject:
   - component: {fileID: 8664279085534412655}
   m_Layer: 0
   m_Name: MeshVertex
-  m_TagString: Untagged
+  m_TagString: Vertex
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6931118996967353923
 Transform:
   m_ObjectHideFlags: 0
@@ -121,8 +121,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6120060018062653201}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -2, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children:
   - {fileID: 3009610101672066721}
   m_Father: {fileID: 0}
