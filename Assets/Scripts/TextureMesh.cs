@@ -50,7 +50,7 @@ public class TextureMesh : MonoBehaviour
             GameObject g = Instantiate(Resources.Load("Prefabs/Vertices/MeshVertex")) as GameObject;
             vControllers.Add(g);
         }
-        dRes.InitSliderRange(RES_MIN, RES_MAX, RES_MAX);
+        dRes.InitSliderRange(RES_MIN, RES_MAX, 5);
 
         dRes.SetSliderListener(SetVerticies);    
     }
@@ -60,7 +60,7 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
-        //Recalc();
+        Recalc();
     }
 
     #region DRAW_MESH
@@ -257,17 +257,18 @@ public class TextureMesh : MonoBehaviour
         {
             if(tNdx * 2 < TriNorm.Length)
             {
-                a = v[tNdx + curRes + 1] - v[tNdx + curRes];
-                b = v[tNdx] - v[tNdx + curRes];
+                curRow = i / (curRes - 1);
+                a = v[curRow + tNdx + curRes + 1] - v[curRow + tNdx + curRes];
+                b = v[curRow + tNdx] - v[curRow + tNdx + curRes];
                 TriNorm[tNdx * 2] = Vector3.Cross(a, b).normalized;
 
-                a = v[tNdx + curRes + 1] - v[tNdx];
-                b = v[tNdx + 1] - v[tNdx];
+                a = v[curRow + tNdx + curRes + 1] - v[curRow + tNdx];
+                b = v[curRow + tNdx + 1] - v[curRow + tNdx];
                 TriNorm[tNdx * 2 + 1] = Vector3.Cross(a, b).normalized;
                 tNdx++;
             }
         }
-        for(int i = 0; i < n.Length; i++)
+        for (int i = 0; i < n.Length; i++)
         {
             nextN = Vector3.zero;
             tNdx = i;
@@ -281,13 +282,15 @@ public class TextureMesh : MonoBehaviour
 
             if (curRow < curRes - 1 && tNdx % curRes < curRes - 1)
             {
-                nextN = nextN + TriNorm[(2 * tNdx + ((curRes - 1) * 2) * curRow)] + TriNorm[((2 * tNdx + ((curRes - 1) * 2) * curRow) + 1)];
+                nextN = nextN + TriNorm[(2 * tNdx + ((curRes - 1) * 2) * curRow)] 
+                    + TriNorm[((2 * tNdx + ((curRes - 1) * 2) * curRow) + 1)];
                 //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow));
                 //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow) + 1);
             }
             if(curRow > 0 && tNdx % curRes > 0)
             {
-                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1))] + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1];
+                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1))] 
+                    + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1];
                 //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)));
                 //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1);
             }
