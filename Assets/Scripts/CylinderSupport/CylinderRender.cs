@@ -10,7 +10,7 @@ public class CylinderRender : MonoBehaviour
   public float cylinderTotalHeight = 20f;
   private float resolutionDist = 0f;
   private float cylinderRadius = 10;
-  private Transform[] manipulatedVertices = null;
+  private Transform[,] manipulatedVertices = null;
 
   private float currCylRotation = 360f;
   void Awake()
@@ -26,14 +26,14 @@ public class CylinderRender : MonoBehaviour
 
   public void GenerateCylinderVertices()
   {
-    manipulatedVertices = new Transform[(int)resolutionVert + 1];
+    manipulatedVertices = new Transform[(int)resolutionVert + 1, (int)resolutionVert + 1];
     for (int height = 0; height <= resolutionVert; height++)
     {
       // maintain width consistency
       for (int i = 0; i < resolutionVert + 1; i++)
       {
         Transform vertex = CreateLayer((cylinderTotalHeight / resolutionVert) * height, cylinderRadius, i);
-        if (i == 0) manipulatedVertices[height] = vertex;
+        manipulatedVertices[height,i] = vertex;
       }
     }
   }
@@ -76,14 +76,15 @@ public class CylinderRender : MonoBehaviour
   {
     resolutionDist = (rot / resolutionVert) * Mathf.Deg2Rad;
     currCylRotation = rot;
-    DestroyPreviousRender();
     for (int height = 0; height <= resolutionVert ; height++)
     {
-      RotationalSweep(manipulatedVertices[height].localPosition);
+      float radius =
+        (manipulatedVertices[height,0].localPosition - new Vector3(0, manipulatedVertices[height,0].localPosition.y, 0)) .magnitude;
+      ManipulateRotationalSweep(height, radius);
     }
   }
 
-  private void DestroyPreviousRender(bool destroyMesh = false)
+  public void DestroyPreviousRender(bool destroyMesh = false)
   {
     GameObject[] vertices = GameObject.FindGameObjectsWithTag("CylinderVertex");
     foreach (GameObject vertex in vertices)
@@ -100,8 +101,30 @@ public class CylinderRender : MonoBehaviour
     }
   }
 
-  public Transform[] GetMeshTransforms()
+  public void UnknownRotationalSweep(GameObject vertex)
   {
-    return manipulatedVertices;
+    for (int i = 0; i < manipulatedVertices.GetLength(0); i++)
+    {
+      if (!manipulatedVertices[i,0].gameObject.Equals(vertex)) continue;
+      float radius =
+        (manipulatedVertices[i,0].localPosition - new Vector3(0, manipulatedVertices[i,0].localPosition.y, 0)) .magnitude;
+      ManipulateRotationalSweep(i, radius);
+      break;
+    }
+  }
+
+  private void ManipulateRotationalSweep(int layer, float radius)
+  {
+    Transform vertex = manipulatedVertices[layer, 0];
+    for(int i = 1; i < manipulatedVertices.GetLength(0); i++)
+    {
+      Vector3 vertPos;
+      /** Set Vertex position vector. */
+      vertPos.x = radius * Mathf.Cos(i * resolutionDist);
+      vertPos.y = vertex.localPosition.y;
+      vertPos.z = radius * Mathf.Sin(i * resolutionDist);
+      /*********************************/
+      manipulatedVertices[layer,i].localPosition = vertPos;
+    }
   }
 }

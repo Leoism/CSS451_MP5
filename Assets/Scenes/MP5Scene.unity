@@ -1521,6 +1521,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &982246738 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6120060018062653201, guid: 58526d272fe9ebd42bd85aa6f9573e09,
+    type: 3}
+  m_PrefabInstance: {fileID: 8505388334627576295}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1142934193
 GameObject:
   m_ObjectHideFlags: 0
@@ -2527,6 +2533,7 @@ GameObject:
   - component: {fileID: 1421593074}
   - component: {fileID: 1421593073}
   - component: {fileID: 1421593077}
+  - component: {fileID: 1421593078}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -2622,7 +2629,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vertexPrefab: {fileID: 771391469}
+  meshPrefab: {fileID: 982246738}
   resolutionVert: 10
+  cylinderTotalHeight: 20
+--- !u!114 &1421593078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421593072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 936a655935a484e4198e7906420a3646, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  axisFrame: {fileID: 1445058959}
+  cylRenderer: {fileID: 1421593077}
 --- !u!224 &1438745992 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4062938375810314927, guid: 6fc0fd3ff5adeef439febc400f591bb1,

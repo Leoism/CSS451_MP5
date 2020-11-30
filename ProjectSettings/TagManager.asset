@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - CylinderVertex
+  - MeshVertex
   layers:
   - Default
   - TransparentFX
