@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class Main : MonoBehaviour
 {
     public XformControl meshXform = null;
-    public Transform TheMesh = null;
-    public Transform TheCylinder = null;
+    public Transform TheCylinder = null, AxisFrame = null;
+    public TextureMesh TheMesh = null;
     Transform curSelected = null;
 
     public Dropdown TheMenu = null;
@@ -19,19 +19,19 @@ public class Main : MonoBehaviour
     {
         Debug.Assert(TheMenu != null);
         Debug.Assert(meshXform != null);
-
+        Debug.Assert(AxisFrame != null);
         Debug.Assert(TheMesh != null);
         Debug.Assert(TheCylinder != null);
 
-        meshXform.SetSelected(TheMesh);
+        meshXform.SetSelected(TheMesh.gameObject.transform);
         mSelectMenuOptions.Add(new Dropdown.OptionData("Mesh"));
         mSelectMenuOptions.Add(new Dropdown.OptionData("Cylinder"));
-        mSelectedTransform.Add(TheMesh);
+        mSelectedTransform.Add(TheMesh.gameObject.transform);
         mSelectedTransform.Add(TheCylinder);
 
         TheMenu.AddOptions(mSelectMenuOptions);
         TheMenu.onValueChanged.AddListener(ShowMesh);
-        curSelected = TheMesh;
+        curSelected = TheMesh.gameObject.transform;
     }
 
     // Update is called once per frame
@@ -42,6 +42,9 @@ public class Main : MonoBehaviour
 
     void ShowMesh(int index)
     {
+        TheMesh.HideVertices();
+        AxisFrame.gameObject.SetActive(false);
+
         Transform t = mSelectedTransform[index];
         if(t != null)
         {
@@ -52,5 +55,10 @@ public class Main : MonoBehaviour
             }
             curSelected = t;
         }
+    }
+
+    public Transform GetCurSelected()
+    {
+        return curSelected;
     }
 }
