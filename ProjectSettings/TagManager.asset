@@ -6,6 +6,8 @@ TagManager:
   tags:
   - CylinderVertex
   - MeshVertex
+  - Vertex
+  - Axis
   layers:
   - Default
   - TransparentFX

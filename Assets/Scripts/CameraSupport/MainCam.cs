@@ -50,7 +50,6 @@ public class MainCam : MonoBehaviour
             ChangeFOV(Input.GetAxis("Mouse ScrollWheel"));
             if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
             {
-                //if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
                 if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
                 mouseDown = Input.mousePosition;
 
@@ -59,7 +58,6 @@ public class MainCam : MonoBehaviour
             }
             if(Input.GetMouseButton(0) || Input.GetMouseButton(1))
             {
-                //if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
                 if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
                 dTumble = mouseDown - Input.mousePosition;
                 dTrack = mouseDown - Input.mousePosition;
