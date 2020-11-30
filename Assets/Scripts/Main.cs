@@ -8,12 +8,12 @@ public class Main : MonoBehaviour
     public XformControl meshXform = null;
     public Transform TheCylinder = null, AxisFrame = null;
     public TextureMesh TheMesh = null;
+    public CylinderMeshManipulation cylinderMesh = null;
     Transform curSelected = null;
 
     public Dropdown TheMenu = null;
     List<Dropdown.OptionData> mSelectMenuOptions = new List<Dropdown.OptionData>();
     List<Transform> mSelectedTransform = new List<Transform>();
-
     // Start is called before the first frame update
     void Start()
     {
@@ -22,6 +22,7 @@ public class Main : MonoBehaviour
         Debug.Assert(AxisFrame != null);
         Debug.Assert(TheMesh != null);
         Debug.Assert(TheCylinder != null);
+        Debug.Assert(cylinderMesh != null);
 
         meshXform.SetSelected(TheMesh.gameObject.transform);
         mSelectMenuOptions.Add(new Dropdown.OptionData("Mesh"));
@@ -57,7 +58,10 @@ public class Main : MonoBehaviour
             // 1 is cylinder
             if(index == 1)
             {
-              t.gameObject.GetComponent<CylinderRender>().GenerateCylinderVertices();
+                cylinderMesh.SetSelect(true);
+            } else
+            {
+                cylinderMesh.SetSelect(false);
             }
         }
     }

@@ -6,10 +6,11 @@ public class CylinderMeshManipulation : MonoBehaviour
 {
   public Transform axisFrame = null;
   public CylinderRender cylRenderer = null;
+  private bool isSelected = false;
   private Transform currSelected = null;
   private Transform selectedAxis = null;
   private Vector3 prevMousePos;
-  private float mouseSpeed = 5f;
+  private float mouseSpeed = 2f;
   void Start()
   {
     Debug.Assert(axisFrame != null);
@@ -17,6 +18,7 @@ public class CylinderMeshManipulation : MonoBehaviour
   }
   void Update()
   {
+    if (!isSelected) return;
     if (Input.GetMouseButtonDown(0))
     {
       SelectMeshVertex();
@@ -28,7 +30,32 @@ public class CylinderMeshManipulation : MonoBehaviour
     } else {
       selectedAxis = null;
     }
+    if (Input.GetKey(KeyCode.LeftControl))
+    {
+      ToggleVertices(true);
+    } else
+    {
+      ToggleVertices(false);
+    }
   }
+
+  public void SetSelect(bool isSelected)
+  {
+    this.isSelected = isSelected;
+    if (!isSelected)
+    {
+      axisFrame.gameObject.SetActive(false);
+      cylRenderer.DestroyPreviousRender();
+    }
+    else cylRenderer.GenerateCylinderVertices();
+  }
+  void ToggleVertices(bool state)
+  {
+    if (!isSelected && state) return;
+    cylRenderer.ToggleAllVertices(state);
+    axisFrame.gameObject.SetActive(state);
+  }
+
   void SelectMeshVertex()
   {
     RaycastHit hit;
@@ -41,6 +68,7 @@ public class CylinderMeshManipulation : MonoBehaviour
         currSelected = hit.transform;
         axisFrame.localPosition = currSelected.localPosition;
         prevMousePos = Input.mousePosition;
+        axisFrame.gameObject.SetActive(true);
       }
     }
   }
@@ -66,18 +94,23 @@ public class CylinderMeshManipulation : MonoBehaviour
     if (axisName.Equals("FrameX"))
     {
       float offset = Vector3.Dot(Input.mousePosition - prevMousePos, Vector3.right);
-      axisFrame.localPosition += (offset > 0 ? Vector3.right : -Vector3.right) * mouseSpeed * Time.smoothDeltaTime;
+      prevMousePos = Input.mousePosition;
+      axisFrame.localPosition += (offset * Vector3.right) * mouseSpeed * Time.smoothDeltaTime;
     }
     else if (axisName.Equals("FrameY"))
     {
       float offset = Vector3.Dot(Input.mousePosition - prevMousePos, Vector3.up);
-      axisFrame.localPosition += (offset > 0 ? Vector3.up : -Vector3.up) * mouseSpeed * Time.smoothDeltaTime;
+      prevMousePos = Input.mousePosition;
+      axisFrame.localPosition += (offset * Vector3.up) * mouseSpeed * Time.smoothDeltaTime;
     }
     else if (axisName.Equals("FrameZ"))
     {
-      float offset = Vector3.Dot(Input.mousePosition - prevMousePos, Vector3.forward);
-      axisFrame.localPosition += (offset > 0 ? Vector3.forward : -Vector3.forward) * mouseSpeed * Time.smoothDeltaTime;
+      float offset = Vector3.Dot(Input.mousePosition - prevMousePos, Vector3.right);
+      prevMousePos = Input.mousePosition;
+      Vector3 newPos = new Vector3(0, 0, (offset * Vector3.right).x);
+      axisFrame.localPosition +=  newPos * mouseSpeed * Time.smoothDeltaTime;  
     }
+
     currSelected.localPosition = axisFrame.localPosition;
     cylRenderer.UnknownRotationalSweep(currSelected.gameObject);
   }

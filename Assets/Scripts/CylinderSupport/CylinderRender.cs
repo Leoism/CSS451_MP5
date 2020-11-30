@@ -24,45 +24,6 @@ public class CylinderRender : MonoBehaviour
     Debug.Assert(meshPrefab != null);
   }
 
-  public void GenerateCylinderVertices()
-  {
-    manipulatedVertices = new Transform[(int)resolutionVert + 1, (int)resolutionVert + 1];
-    for (int height = 0; height <= resolutionVert; height++)
-    {
-      // maintain width consistency
-      for (int i = 0; i < resolutionVert + 1; i++)
-      {
-        Transform vertex = CreateLayer((cylinderTotalHeight / resolutionVert) * height, cylinderRadius, i);
-        manipulatedVertices[height,i] = vertex;
-      }
-    }
-  }
-
-  private Transform CreateLayer(float yElevation, float radius, int count)
-  {
-    Vector3 vertSize = new Vector3(0.5f, 0.5f, 0.5f);
-    Vector3 vertPos;
-    /** Set Vertex position vector. */
-    vertPos.x = radius * Mathf.Cos(count * resolutionDist);
-    vertPos.y = yElevation;
-    vertPos.z = radius * Mathf.Sin(count * resolutionDist);
-    /*********************************/
-    GameObject vertex = count == 0 ? Instantiate(meshPrefab) : Instantiate(vertexPrefab);
-    vertex.tag = count == 0 ? "MeshVertex" : "CylinderVertex";
-    vertex.transform.localScale = vertSize;
-    vertex.transform.localPosition = vertPos;
-    return vertex.transform;
-  }
-
-  private void RotationalSweep(Vector3 vertexPos)
-  {
-    for (int vertex = 0; vertex < resolutionVert + 1; vertex++)
-    {
-      float radius = (vertexPos - new Vector3(0, vertexPos.y, 0)) .magnitude;
-      CreateLayer(vertexPos.y, radius, vertex);
-    }
-  }
-
   public void SetResolution(float res)
   {
     // maintain height consistency
@@ -101,6 +62,36 @@ public class CylinderRender : MonoBehaviour
     }
   }
 
+  public void GenerateCylinderVertices()
+  {
+    manipulatedVertices = new Transform[(int)resolutionVert + 1, (int)resolutionVert + 1];
+    for (int height = 0; height <= resolutionVert; height++)
+    {
+      // maintain width consistency
+      for (int i = 0; i < resolutionVert + 1; i++)
+      {
+        Transform vertex = CreateLayer((cylinderTotalHeight / resolutionVert) * height, cylinderRadius, i);
+        manipulatedVertices[height,i] = vertex;
+      }
+    }
+  }
+
+  private Transform CreateLayer(float yElevation, float radius, int count)
+  {
+    Vector3 vertSize = new Vector3(0.5f, 0.5f, 0.5f);
+    Vector3 vertPos;
+    /** Set Vertex position vector. */
+    vertPos.x = radius * Mathf.Cos(count * resolutionDist);
+    vertPos.y = yElevation;
+    vertPos.z = radius * Mathf.Sin(count * resolutionDist);
+    /*********************************/
+    GameObject vertex = count == 0 ? Instantiate(meshPrefab) : Instantiate(vertexPrefab);
+    vertex.tag = count == 0 ? "MeshVertex" : "CylinderVertex";
+    vertex.transform.localScale = vertSize;
+    vertex.transform.localPosition = vertPos;
+    return vertex.transform;
+  }
+
   public void UnknownRotationalSweep(GameObject vertex)
   {
     for (int i = 0; i < manipulatedVertices.GetLength(0); i++)
@@ -127,4 +118,15 @@ public class CylinderRender : MonoBehaviour
       manipulatedVertices[layer,i].localPosition = vertPos;
     }
   }
+
+  public void ToggleAllVertices(bool state)
+  {
+    for(int i = 0; i < manipulatedVertices.GetLength(0); i++)
+    {
+      for(int k = 0; k < manipulatedVertices.GetLength(1); k++)
+      {
+        manipulatedVertices[i,k].gameObject.SetActive(state);
+      }
+    }
+  } 
 }
