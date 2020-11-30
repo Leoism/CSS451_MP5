@@ -280,7 +280,6 @@ public class TextureMesh : MonoBehaviour
                 curRow++;
             }
 
-            //Debug.Log("index: " + i + "; tndx: " + tNdx + "; row: " + curRow);
             if (curRow < curRes - 1 && tNdx % curRes < curRes - 1)
             {
                 nextN = nextN + TriNorm[(2 * tNdx + ((curRes - 1) * 2) * curRow)] 
