@@ -14,7 +14,6 @@ public class TextureMesh : MonoBehaviour
     Mesh TheMesh = null;
     Transform Vertex = null, SelectedFrame = null;
     public Transform AxisFrame = null;
-    int verNdx = -1;
 
     Color selected = new Color(1f, 1f, 0, 1f);
     Color deselect;
@@ -51,10 +50,9 @@ public class TextureMesh : MonoBehaviour
             GameObject g = Instantiate(Resources.Load("Prefabs/Vertices/MeshVertex")) as GameObject;
             vControllers.Add(g);
         }
-        dRes.InitSliderRange(RES_MIN, RES_MAX, 2);
+        dRes.InitSliderRange(RES_MIN, RES_MAX, RES_MAX);
 
-        dRes.SetSliderListener(SetVerticies);
-        //SetVerticies(dRes.GetValue());        
+        dRes.SetSliderListener(SetVerticies);    
     }
 
     // Update is called once per frame
@@ -62,6 +60,7 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
+        //Recalc();
     }
 
     #region DRAW_MESH
@@ -69,6 +68,7 @@ public class TextureMesh : MonoBehaviour
     void SetVerticies(float v)
     {
         TheMesh.Clear();
+        AxisFrame.gameObject.SetActive(false);
         isActive = false;
         curRes = (int)v;
         Vertices = new Vector3[curRes * curRes];
@@ -90,6 +90,7 @@ public class TextureMesh : MonoBehaviour
             vControllers[i].transform.position = Vertices[i];
         }
         DrawTris();
+        Recalc();
     }
 
     void DrawTris()
@@ -164,17 +165,10 @@ public class TextureMesh : MonoBehaviour
             vControllers[i].SetActive(false);
         }
         isActive = false;
+        AxisFrame.gameObject.SetActive(false);
     }
 
     #endregion
-
-    public void SetVertex(Vector3 ver, int ndx)
-    {
-        if(ndx < Vertices.Length)
-        {
-            
-        }
-    }
 
     void MouseSupport()
     {
@@ -197,7 +191,6 @@ public class TextureMesh : MonoBehaviour
                             Vertex = targetedObj.transform;
                             AxisFrame.gameObject.SetActive(true);
                             AxisFrame.position = Vertex.position;
-                            //TODO: manipulate mesh
                         } 
                         else if(targetedObj.tag == "Axis")
                         {
@@ -246,5 +239,76 @@ public class TextureMesh : MonoBehaviour
         }
     }
 
-    
+    void Recalc()
+    {
+        Vector3[] v = TheMesh.vertices;
+        Vector3[] n = TheMesh.normals;
+        Vector3 nextN = Vector3.zero;
+
+        Vector3[] TriNorm = new Vector3[(curRes - 1) * (curRes - 1) * 2];
+        Vector3 a, b;
+        int tNdx = 0, curRow = 0;
+
+        for (int i = 0; i < v.Length; i++)
+        {
+            v[i] = vControllers[i].transform.position;
+        }
+        for(int i = 0; i < TriNorm.Length; i++)
+        {
+            if(tNdx * 2 < TriNorm.Length)
+            {
+                a = v[tNdx + curRes + 1] - v[tNdx + curRes];
+                b = v[tNdx] - v[tNdx + curRes];
+                TriNorm[tNdx * 2] = Vector3.Cross(a, b).normalized;
+
+                a = v[tNdx + curRes + 1] - v[tNdx];
+                b = v[tNdx + 1] - v[tNdx];
+                TriNorm[tNdx * 2 + 1] = Vector3.Cross(a, b).normalized;
+                tNdx++;
+            }
+        }
+        for(int i = 0; i < n.Length; i++)
+        {
+            nextN = Vector3.zero;
+            tNdx = i;
+            curRow = 0;
+
+            while(tNdx > (curRes - 1))
+            {
+                tNdx -= curRes;
+                curRow++;
+            }
+
+            Debug.Log("index: " + i + "; tndx: " + tNdx + "; row: " + curRow);
+            if (curRow < curRes - 1 && tNdx % curRes < curRes - 1)
+            {
+                nextN = nextN + TriNorm[(2 * tNdx + ((curRes - 1) * 2) * curRow)] + TriNorm[((2 * tNdx + ((curRes - 1) * 2) * curRow) + 1)];
+                //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow));
+                //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow) + 1);
+            }
+            if(curRow > 0 && tNdx % curRes > 0)
+            {
+                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1))] + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1];
+                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)));
+                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1);
+            }
+            if(curRow < curRes - 1 && tNdx % curRes > 0)
+            {
+                nextN = nextN + TriNorm[2 * (tNdx - 1 + curRow * (curRes - 1)) + 1];
+                //Debug.Log(2 * (tNdx - 1 + curRow * (curRes - 1)) + 1);
+            }
+            if(curRow > 0 && tNdx % curRes < curRes - 1)
+            {
+                nextN = nextN + TriNorm[2 * (tNdx + (curRes - 1) * (curRow - 1))];
+                //Debug.Log(2 * (tNdx + (curRes - 1) * (curRow - 1)));
+            }
+
+            n[i] = nextN.normalized;
+            vControllers[i].transform.up = n[i];
+            Debug.Log(n[i]);
+        }
+
+        TheMesh.vertices = v;
+        TheMesh.normals = n;
+    }
 }
