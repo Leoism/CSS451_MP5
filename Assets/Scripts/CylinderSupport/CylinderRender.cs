@@ -93,7 +93,8 @@ public class CylinderRender : MonoBehaviour
   }
   public void SetRotation(float rot)
   {
-    resolutionDist = (rot / (wResolution)) * Mathf.Deg2Rad;
+    if (manipulatedVertices == null) return;
+    resolutionDist = (rot / wResolution) * Mathf.Deg2Rad;
     currCylRotation = rot;
     for (int height = 0; height <= hResolution ; height++)
     {

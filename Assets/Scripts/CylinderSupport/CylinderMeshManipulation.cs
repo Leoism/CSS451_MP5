@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CylinderMeshManipulation : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class CylinderMeshManipulation : MonoBehaviour
   private Color axisColor;
   private Vector3 prevMousePos;
   private float mouseSpeed = 2f;
+    private int fingerID = -1;
   void Start()
   {
     Debug.Assert(axisFrame != null);
@@ -23,14 +25,16 @@ public class CylinderMeshManipulation : MonoBehaviour
   void Update()
   {
     if (!isSelected) return;
-    if (Input.GetMouseButtonDown(0))
+    if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt))
     {
-      SelectMeshVertex();
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
+            SelectMeshVertex();
       SelectAxis();
     }
-    else if (Input.GetMouseButton(0))
+    else if (Input.GetMouseButton(0) && !Input.GetKey(KeyCode.LeftAlt))
     {
-      if (selectedAxis != null)
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
+            if (selectedAxis != null)
         selectedAxis.gameObject.GetComponent<Renderer>().material.color = Color.yellow;
       MoveAxis();
     } else {
@@ -58,12 +62,19 @@ public class CylinderMeshManipulation : MonoBehaviour
     else cylRenderer.GenerateCylinderVertices();
     cylMeshRender.SetSelected(isSelected);
   }
-  void ToggleVertices(bool state)
-  {
-    if (!isSelected && state) return;
-    cylRenderer.ToggleAllVertices(state);
-    axisFrame.gameObject.SetActive(state);
-  }
+    void ToggleVertices(bool state)
+    {
+        if (!isSelected && state) return;
+        cylRenderer.ToggleAllVertices(state);
+        if (!state) currSelected = null;
+        if (state && currSelected != null)
+        {
+            axisFrame.gameObject.SetActive(state);
+        }
+        else axisFrame.gameObject.SetActive(false); 
+    }
+
+
 
   void SelectMeshVertex()
   {
@@ -79,7 +90,12 @@ public class CylinderMeshManipulation : MonoBehaviour
         prevMousePos = Input.mousePosition;
         axisFrame.gameObject.SetActive(true);
       }
-    }
+        }
+        else
+        {
+            currSelected = null;
+            axisFrame.gameObject.SetActive(false);
+        }
   }
 
   void SelectAxis()
@@ -100,6 +116,7 @@ public class CylinderMeshManipulation : MonoBehaviour
   void MoveAxis()
   {
     if (selectedAxis == null) return;
+        if (currSelected == null) return;
     string axisName = selectedAxis.gameObject.name;
     if (axisName.Equals("FrameX"))
     {
