@@ -60,7 +60,7 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
-        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes);
+        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes, curRes);
     }
 
     #region DRAW_MESH
@@ -89,38 +89,26 @@ public class TextureMesh : MonoBehaviour
             Normals[i] = Vector3.up;
             vControllers[i].transform.position = Vertices[i];
         }
-        DrawTris();
-        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes);
+        DrawTris(curRes, curRes);
+        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes, curRes);
     }
 
-    void DrawTris()
+    void DrawTris(int width, int height)
     {
-        Tris = new int[(curRes - 1) * (curRes - 1) * 6];
-        int temp, curRow, tNdx = 0;
-        for (int i = 0; i < Vertices.Length; i++)
+        Tris = new int[(width - 1) * (height - 1) * 6];
+        int triangleIdx = 0;
+        for (int row = 0; row < height - 1; row++)
         {
-            if(6 * tNdx < Tris.Length)
+            for (int col = 0; col < width - 1; col++)
             {
-                temp = i;
-                curRow = 0;
-                while (temp > curRes - 1)
-                {
-                    temp -= curRes;
-                    curRow++;
-                }
-                if ((temp % curRes < curRes - 1) && (curRow < curRes - 1))
-                {
-                    Tris[6 * tNdx] = i;
-                    Tris[6 * tNdx + 1] = i + curRes;
-                    Tris[6 * tNdx + 2] = i + curRes + 1;
+                int currPt = row * width + col;
+                Tris[triangleIdx++] = currPt;
+                Tris[triangleIdx++] = currPt + width;
+                Tris[triangleIdx++] = currPt + width + 1;
 
-                    Tris[6 * tNdx + 3] = i;
-                    Tris[6 * tNdx + 4] = i + curRes + 1;
-                    Tris[6 * tNdx + 5] = i + 1;
-
-                    tNdx++;
-                }
-                
+                Tris[triangleIdx++] = currPt;
+                Tris[triangleIdx++] = currPt + width + 1;
+                Tris[triangleIdx++] = currPt + 1;
             }
         }
         TheMesh.vertices = Vertices;
@@ -239,28 +227,29 @@ public class TextureMesh : MonoBehaviour
         }
     }
 
-    public void Recalc(Vector3[] v, Vector3[] n, Mesh theMesh, List<GameObject> vertControllers, int meshWidth)
+    public void Recalc(Vector3[] v, Vector3[] n, Mesh theMesh, List<GameObject> vertControllers, int meshWidth, int meshHeight)
     {
         Vector3 nextN = Vector3.zero;
 
-        Vector3[] TriNorm = new Vector3[(meshWidth - 1) * (meshWidth - 1) * 2];
+        Vector3[] TriNorm = new Vector3[(meshWidth - 1) * (meshHeight - 1) * 2];
         Vector3 a, b;
         int tNdx = 0, curRow = 0;
-
+        // Move vertices to controller position.
         for (int i = 0; i < v.Length; i++)
         {
             v[i] = vertControllers[i].transform.position;
         }
+
         for(int i = 0; i < TriNorm.Length; i++)
         {
             if(tNdx * 2 < TriNorm.Length)
             {
-                curRow = i / (meshWidth - 1);
-                a = v[curRow + tNdx + meshWidth + 1] - v[curRow + tNdx + meshWidth];
+                curRow = i / (meshHeight - 1);
+                a = v[curRow + tNdx + meshHeight + 1] - v[curRow + tNdx + meshWidth];
                 b = v[curRow + tNdx] - v[curRow + tNdx + meshWidth];
                 TriNorm[tNdx * 2] = Vector3.Cross(a, b).normalized;
 
-                a = v[curRow + tNdx + meshWidth + 1] - v[curRow + tNdx];
+                a = v[curRow + tNdx + meshHeight + 1] - v[curRow + tNdx];
                 b = v[curRow + tNdx + 1] - v[curRow + tNdx];
                 TriNorm[tNdx * 2 + 1] = Vector3.Cross(a, b).normalized;
                 tNdx++;
@@ -272,9 +261,9 @@ public class TextureMesh : MonoBehaviour
             tNdx = i;
             curRow = 0;
 
-            while(tNdx > (meshWidth - 1))
+            while(tNdx > (meshHeight - 1))
             {
-                tNdx -= meshWidth;
+                tNdx -= meshHeight;
                 curRow++;
             }
 

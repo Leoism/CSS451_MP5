@@ -6,7 +6,8 @@ public class CylinderRender : MonoBehaviour
 {
   public GameObject vertexPrefab = null;
   public GameObject meshPrefab = null;
-  public float resolutionVert = 30f;
+  public float wResolution = 4f;
+  public float hResolution = 4f;
   public float cylinderTotalHeight = 20f;
   private float resolutionDist = 0f;
   private float cylinderRadius = 10;
@@ -15,7 +16,7 @@ public class CylinderRender : MonoBehaviour
   private float currCylRotation = 180f;
   void Awake()
   {
-    resolutionDist = (currCylRotation / resolutionVert) * Mathf.Deg2Rad;
+    resolutionDist = (currCylRotation / wResolution) * Mathf.Deg2Rad;
   }
 
   void Start()
@@ -27,12 +28,14 @@ public class CylinderRender : MonoBehaviour
   public Vector3[] GetVertices()
   {
     Vector3[] allVertices = new Vector3[manipulatedVertices.Length];
-    int rowLength = manipulatedVertices.GetLength(0);
-    for (int r = 0; r < rowLength; r++)
+    int hLength = manipulatedVertices.GetLength(0);
+    int wLength = manipulatedVertices.GetLength(1);
+    int i = 0;
+    for (int r = 0; r < hLength; r++)
     {
-      for (int c = 0; c < manipulatedVertices.GetLength(1); c++)
+      for (int c = 0; c < wLength; c++)
       {
-        allVertices[r * rowLength + c] = manipulatedVertices[r,c].localPosition;
+        allVertices[i++] = manipulatedVertices[r,c].localPosition;
       }
     }
     return allVertices;
@@ -41,12 +44,14 @@ public class CylinderRender : MonoBehaviour
   public List<GameObject> GetVerticesControllers()
   {
     GameObject[] allVertices = new GameObject[manipulatedVertices.Length];
-    int rowLength = manipulatedVertices.GetLength(0);
-    for (int r = 0; r < rowLength; r++)
+    int hLength = manipulatedVertices.GetLength(0);
+    int wLength = manipulatedVertices.GetLength(1);
+    int i = 0;
+    for (int r = 0; r < hLength; r++)
     {
-      for (int c = 0; c < manipulatedVertices.GetLength(1); c++)
+      for (int c = 0; c < wLength; c++)
       {
-        allVertices[r * rowLength + c] = manipulatedVertices[r,c].gameObject;
+        allVertices[i++] = manipulatedVertices[r,c].gameObject;
       }
     }
     return new List<GameObject>(allVertices);
@@ -54,28 +59,43 @@ public class CylinderRender : MonoBehaviour
 
   public int GetWidth()
   {
-    return manipulatedVertices.GetLength(0);
+    return manipulatedVertices.GetLength(1);
   }
 
   public int GetHeight()
   {
-    return manipulatedVertices.GetLength(1);
+    return manipulatedVertices.GetLength(0);
   }
 
-  public void SetResolution(float res)
+  public void SetResolution(float wRes, float hRes)
   {
     // maintain height consistency
-    resolutionVert = res - 1;
-    resolutionDist = (currCylRotation / resolutionVert) * Mathf.Deg2Rad;
+    hResolution = hRes - 1;
+    wResolution = wRes - 1;
+    resolutionDist = (currCylRotation / wRes) * Mathf.Deg2Rad;
     DestroyPreviousRender(true);
     GenerateCylinderVertices();
   }
 
+  public void SetWidth(float res)
+  {
+    wResolution = res - 1;
+    resolutionDist = (currCylRotation / wResolution) * Mathf.Deg2Rad;
+    DestroyPreviousRender(true);
+    GenerateCylinderVertices();
+  }
+
+  public void SetHeight(float res)
+  {
+    hResolution = res - 1;
+    DestroyPreviousRender(true);
+    GenerateCylinderVertices();
+  }
   public void SetRotation(float rot)
   {
-    resolutionDist = (rot / resolutionVert) * Mathf.Deg2Rad;
+    resolutionDist = (rot / (wResolution)) * Mathf.Deg2Rad;
     currCylRotation = rot;
-    for (int height = 0; height <= resolutionVert ; height++)
+    for (int height = 0; height <= hResolution ; height++)
     {
       float radius =
         (manipulatedVertices[height,0].localPosition - new Vector3(0, manipulatedVertices[height,0].localPosition.y, 0)) .magnitude;
@@ -103,13 +123,13 @@ public class CylinderRender : MonoBehaviour
 
   public void GenerateCylinderVertices()
   {
-    manipulatedVertices = new Transform[(int)resolutionVert + 1, (int)resolutionVert + 1];
-    for (int height = 0; height <= resolutionVert; height++)
+    manipulatedVertices = new Transform[(int)hResolution + 1, (int)wResolution + 1];
+    for (int height = 0; height <= hResolution; height++)
     {
       // maintain width consistency
-      for (int i = 0; i < resolutionVert + 1; i++)
+      for (int i = 0; i < wResolution + 1; i++)
       {
-        Transform vertex = CreateLayer((cylinderTotalHeight / resolutionVert) * height, cylinderRadius, i);
+        Transform vertex = CreateLayer((cylinderTotalHeight / hResolution) * height, cylinderRadius, i);
         manipulatedVertices[height,i] = vertex;
       }
     }
@@ -146,7 +166,7 @@ public class CylinderRender : MonoBehaviour
   private void ManipulateRotationalSweep(int layer, float radius)
   {
     Transform vertex = manipulatedVertices[layer, 0];
-    for(int i = 1; i < manipulatedVertices.GetLength(0); i++)
+    for(int i = 1; i < manipulatedVertices.GetLength(1); i++)
     {
       Vector3 vertPos;
       /** Set Vertex position vector. */
@@ -160,10 +180,12 @@ public class CylinderRender : MonoBehaviour
 
   public void ToggleAllVertices(bool state)
   {
+    if (manipulatedVertices == null) return;
     for(int i = 0; i < manipulatedVertices.GetLength(0); i++)
     {
       for(int k = 0; k < manipulatedVertices.GetLength(1); k++)
       {
+        if(manipulatedVertices[i,k].gameObject != null)
         manipulatedVertices[i,k].gameObject.SetActive(state);
       }
     }
