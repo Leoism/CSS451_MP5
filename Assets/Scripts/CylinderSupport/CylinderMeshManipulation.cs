@@ -6,15 +6,19 @@ public class CylinderMeshManipulation : MonoBehaviour
 {
   public Transform axisFrame = null;
   public CylinderRender cylRenderer = null;
+  public CylinderMeshRenderer cylMeshRender = null;
+
   private bool isSelected = false;
   private Transform currSelected = null;
   private Transform selectedAxis = null;
+  private Color axisColor;
   private Vector3 prevMousePos;
   private float mouseSpeed = 2f;
   void Start()
   {
     Debug.Assert(axisFrame != null);
     Debug.Assert(cylRenderer != null);
+    Debug.Assert(cylMeshRender != null);
   }
   void Update()
   {
@@ -26,8 +30,12 @@ public class CylinderMeshManipulation : MonoBehaviour
     }
     else if (Input.GetMouseButton(0))
     {
+      if (selectedAxis != null)
+        selectedAxis.gameObject.GetComponent<Renderer>().material.color = Color.yellow;
       MoveAxis();
     } else {
+      if (selectedAxis != null)
+        selectedAxis.gameObject.GetComponent<Renderer>().material.color = axisColor;
       selectedAxis = null;
     }
     if (Input.GetKey(KeyCode.LeftControl))
@@ -45,9 +53,10 @@ public class CylinderMeshManipulation : MonoBehaviour
     if (!isSelected)
     {
       axisFrame.gameObject.SetActive(false);
-      cylRenderer.DestroyPreviousRender();
+      cylRenderer.DestroyPreviousRender(true);
     }
     else cylRenderer.GenerateCylinderVertices();
+    cylMeshRender.SetSelected(isSelected);
   }
   void ToggleVertices(bool state)
   {
@@ -83,6 +92,7 @@ public class CylinderMeshManipulation : MonoBehaviour
       if (hitName.Equals("FrameX") || hitName.Equals("FrameY") || hitName.Equals("FrameZ"))
       {
         selectedAxis = hit.transform;        
+        axisColor = hit.transform.gameObject.GetComponent<Renderer>().material.color;
       }
     }
   }

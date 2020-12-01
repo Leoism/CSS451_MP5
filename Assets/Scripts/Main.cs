@@ -12,6 +12,8 @@ public class Main : MonoBehaviour
     Transform curSelected = null;
 
     public Dropdown TheMenu = null;
+    public Camera mainCamera = null;
+    public Transform lookAt = null;
     List<Dropdown.OptionData> mSelectMenuOptions = new List<Dropdown.OptionData>();
     List<Transform> mSelectedTransform = new List<Transform>();
     // Start is called before the first frame update
@@ -23,6 +25,8 @@ public class Main : MonoBehaviour
         Debug.Assert(TheMesh != null);
         Debug.Assert(TheCylinder != null);
         Debug.Assert(cylinderMesh != null);
+        Debug.Assert(mainCamera != null);
+        Debug.Assert(lookAt != null);
 
         meshXform.SetSelected(TheMesh.gameObject.transform);
         mSelectMenuOptions.Add(new Dropdown.OptionData("Mesh"));
@@ -59,8 +63,17 @@ public class Main : MonoBehaviour
             if(index == 1)
             {
                 cylinderMesh.SetSelect(true);
+                mainCamera.transform.localPosition = 
+                    new Vector3(25, 25, -10);
+                lookAt.localPosition = 
+                    new Vector3(-1, 5, 2);
+                
             } else
             {
+                mainCamera.transform.localPosition =
+                    new Vector3(0, 3, -12);
+                lookAt.localPosition =
+                    new Vector3(0, -1.7f, 7);
                 cylinderMesh.SetSelect(false);
             }
         }

@@ -15,6 +15,8 @@ public class CylinderWidget : MonoBehaviour
     Debug.Assert(rotation != null);
     resolution.SetSliderListener(RenderCylinderVertices);
     rotation.SetSliderListener(SetCylinderRotation);
+    verticesRenderer.SetResolution(resolution.GetValue());
+    verticesRenderer.SetRotation(rotation.GetValue());
   }
 
   private void RenderCylinderVertices(float res)
