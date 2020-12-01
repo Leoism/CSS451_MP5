@@ -73,6 +73,7 @@ public class CylinderRender : MonoBehaviour
 
   public void SetRotation(float rot)
   {
+        if (manipulatedVertices == null) return;
     resolutionDist = (rot / resolutionVert) * Mathf.Deg2Rad;
     currCylRotation = rot;
     for (int height = 0; height <= resolutionVert ; height++)
@@ -160,6 +161,7 @@ public class CylinderRender : MonoBehaviour
 
   public void ToggleAllVertices(bool state)
   {
+        if (manipulatedVertices == null) return;
     for(int i = 0; i < manipulatedVertices.GetLength(0); i++)
     {
       for(int k = 0; k < manipulatedVertices.GetLength(1); k++)
