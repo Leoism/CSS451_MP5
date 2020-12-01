@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CylinderMeshManipulation : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class CylinderMeshManipulation : MonoBehaviour
   private Color axisColor;
   private Vector3 prevMousePos;
   private float mouseSpeed = 2f;
+    private int fingerID = -1;
   void Start()
   {
     Debug.Assert(axisFrame != null);
@@ -25,12 +27,14 @@ public class CylinderMeshManipulation : MonoBehaviour
     if (!isSelected) return;
     if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt))
     {
-      SelectMeshVertex();
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
+            SelectMeshVertex();
       SelectAxis();
     }
     else if (Input.GetMouseButton(0) && !Input.GetKey(KeyCode.LeftAlt))
     {
-      if (selectedAxis != null)
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
+            if (selectedAxis != null)
         selectedAxis.gameObject.GetComponent<Renderer>().material.color = Color.yellow;
       MoveAxis();
     } else {
