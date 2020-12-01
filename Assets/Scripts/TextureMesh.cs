@@ -60,7 +60,7 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
-        Recalc();
+        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes);
     }
 
     #region DRAW_MESH
@@ -90,7 +90,7 @@ public class TextureMesh : MonoBehaviour
             vControllers[i].transform.position = Vertices[i];
         }
         DrawTris();
-        Recalc();
+        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes);
     }
 
     void DrawTris()
@@ -239,30 +239,28 @@ public class TextureMesh : MonoBehaviour
         }
     }
 
-    void Recalc()
+    public void Recalc(Vector3[] v, Vector3[] n, Mesh theMesh, List<GameObject> vertControllers, int meshWidth)
     {
-        Vector3[] v = TheMesh.vertices;
-        Vector3[] n = TheMesh.normals;
         Vector3 nextN = Vector3.zero;
 
-        Vector3[] TriNorm = new Vector3[(curRes - 1) * (curRes - 1) * 2];
+        Vector3[] TriNorm = new Vector3[(meshWidth - 1) * (meshWidth - 1) * 2];
         Vector3 a, b;
         int tNdx = 0, curRow = 0;
 
         for (int i = 0; i < v.Length; i++)
         {
-            v[i] = vControllers[i].transform.position;
+            v[i] = vertControllers[i].transform.position;
         }
         for(int i = 0; i < TriNorm.Length; i++)
         {
             if(tNdx * 2 < TriNorm.Length)
             {
-                curRow = i / (curRes - 1);
-                a = v[curRow + tNdx + curRes + 1] - v[curRow + tNdx + curRes];
-                b = v[curRow + tNdx] - v[curRow + tNdx + curRes];
+                curRow = i / (meshWidth - 1);
+                a = v[curRow + tNdx + meshWidth + 1] - v[curRow + tNdx + meshWidth];
+                b = v[curRow + tNdx] - v[curRow + tNdx + meshWidth];
                 TriNorm[tNdx * 2] = Vector3.Cross(a, b).normalized;
 
-                a = v[curRow + tNdx + curRes + 1] - v[curRow + tNdx];
+                a = v[curRow + tNdx + meshWidth + 1] - v[curRow + tNdx];
                 b = v[curRow + tNdx + 1] - v[curRow + tNdx];
                 TriNorm[tNdx * 2 + 1] = Vector3.Cross(a, b).normalized;
                 tNdx++;
@@ -274,42 +272,42 @@ public class TextureMesh : MonoBehaviour
             tNdx = i;
             curRow = 0;
 
-            while(tNdx > (curRes - 1))
+            while(tNdx > (meshWidth - 1))
             {
-                tNdx -= curRes;
+                tNdx -= meshWidth;
                 curRow++;
             }
 
-            if (curRow < curRes - 1 && tNdx % curRes < curRes - 1)
+            if (curRow < meshWidth - 1 && tNdx % meshWidth < meshWidth - 1)
             {
-                nextN = nextN + TriNorm[(2 * tNdx + ((curRes - 1) * 2) * curRow)] 
-                    + TriNorm[((2 * tNdx + ((curRes - 1) * 2) * curRow) + 1)];
-                //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow));
-                //Debug.Log((2 * tNdx + ((curRes-1) * 2) * curRow) + 1);
+                nextN = nextN + TriNorm[(2 * tNdx + ((meshWidth - 1) * 2) * curRow)] 
+                    + TriNorm[((2 * tNdx + ((meshWidth - 1) * 2) * curRow) + 1)];
+                //Debug.Log((2 * tNdx + ((meshWidth-1) * 2) * curRow));
+                //Debug.Log((2 * tNdx + ((meshWidth-1) * 2) * curRow) + 1);
             }
-            if(curRow > 0 && tNdx % curRes > 0)
+            if(curRow > 0 && tNdx % meshWidth > 0)
             {
-                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1))] 
-                    + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1];
-                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)));
-                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (curRes - 1)) + 1);
+                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1))] 
+                    + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)) + 1];
+                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)));
+                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)) + 1);
             }
-            if(curRow < curRes - 1 && tNdx % curRes > 0)
+            if(curRow < meshWidth - 1 && tNdx % meshWidth > 0)
             {
-                nextN = nextN + TriNorm[2 * (tNdx - 1 + curRow * (curRes - 1)) + 1];
-                //Debug.Log(2 * (tNdx - 1 + curRow * (curRes - 1)) + 1);
+                nextN = nextN + TriNorm[2 * (tNdx - 1 + curRow * (meshWidth - 1)) + 1];
+                //Debug.Log(2 * (tNdx - 1 + curRow * (meshWidth - 1)) + 1);
             }
-            if(curRow > 0 && tNdx % curRes < curRes - 1)
+            if(curRow > 0 && tNdx % meshWidth < meshWidth - 1)
             {
-                nextN = nextN + TriNorm[2 * (tNdx + (curRes - 1) * (curRow - 1))];
-                //Debug.Log(2 * (tNdx + (curRes - 1) * (curRow - 1)));
+                nextN = nextN + TriNorm[2 * (tNdx + (meshWidth - 1) * (curRow - 1))];
+                //Debug.Log(2 * (tNdx + (meshWidth - 1) * (curRow - 1)));
             }
 
             n[i] = nextN.normalized;
-            vControllers[i].transform.up = n[i];
+            vertControllers[i].transform.up = n[i];
         }
 
-        TheMesh.vertices = v;
-        TheMesh.normals = n;
+        theMesh.vertices = v;
+        theMesh.normals = n;
     }
 }
