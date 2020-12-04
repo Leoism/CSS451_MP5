@@ -23,13 +23,15 @@ public class TextureMesh : MonoBehaviour
     Vector3 mouseDown = Vector3.zero;
     Vector3 dPos = Vector3.zero;
 
-    public SliderWithEcho dRes = null;
+    public SliderWithEcho wResSlider = null;
+    public SliderWithEcho hResSlider = null;
     const int RES_MIN = 2;
     const int RES_MAX = 20;
 
     const float LENGTH = 10f;
     const float OFFSET = -5f;
-    int curRes;
+    int hRes = 5;
+    int wRes = 5;
 
     bool isActive = false;
 
@@ -41,7 +43,8 @@ public class TextureMesh : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(dRes != null);
+        Debug.Assert(hResSlider != null);
+        Debug.Assert(wResSlider != null);
         TheMesh = GetComponent<MeshFilter>().mesh;
         TheMesh.Clear();
 
@@ -50,9 +53,12 @@ public class TextureMesh : MonoBehaviour
             GameObject g = Instantiate(Resources.Load("Prefabs/Vertices/MeshVertex")) as GameObject;
             vControllers.Add(g);
         }
-        dRes.InitSliderRange(RES_MIN, RES_MAX, 5);
 
-        dRes.SetSliderListener(SetVerticies);    
+        wResSlider.InitSliderRange(RES_MIN, RES_MAX, 5);
+        hResSlider.InitSliderRange(RES_MIN, RES_MAX, 5);
+
+        wResSlider.SetSliderListener(SetWidth);    
+        hResSlider.SetSliderListener(SetHeight);
     }
 
     // Update is called once per frame
@@ -60,37 +66,47 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
-        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes, curRes);
+        Recalc(TheMesh.vertices, TheMesh.normals, wRes, hRes, TheMesh, vControllers);
     }
 
     #region DRAW_MESH
 
-    void SetVerticies(float v)
+    void SetWidth(float width)
+    {
+        wRes = (int)width;
+        SetVerticies(wRes, hRes);
+    }
+
+    void SetHeight(float height)
+    {
+        hRes = (int)height;
+        SetVerticies(wRes,hRes);
+    }
+    void SetVerticies(float width, float height)
     {
         TheMesh.Clear();
         AxisFrame.gameObject.SetActive(false);
         isActive = false;
-        curRes = (int)v;
-        Vertices = new Vector3[curRes * curRes];
-        Normals = new Vector3[curRes * curRes];
+        wRes = (int)width;
+        hRes = (int)height;
+        Vertices = new Vector3[wRes * hRes];
+        Normals = new Vector3[wRes * hRes];
 
-        float offset = LENGTH / (curRes - 1);
-        int curRow = 0, temp = 0;
-        for(int i = 0; i < Vertices.Length; i++)
+        float wOffset = LENGTH / (wRes - 1);
+        float hOffset = LENGTH / (hRes - 1);
+        int idx = 0;
+
+        for (int i = 0; i < hRes; i++)
         {
-            temp = i;
-            curRow = 0;
-            while(temp > curRes - 1)
-            {
-                temp -= curRes;
-                curRow++;
+            for (int j = 0; j < wRes; j++) {
+                Vertices[idx] = new Vector3((float)(-1 + (j * wOffset)), 0, (float)(-1 + (i * hOffset)));
+                Normals[idx] = Vector3.up;
+                vControllers[idx].transform.localPosition = Vertices[idx];
+                idx++;
             }
-            Vertices[i] = new Vector3(OFFSET + offset * (temp % curRes), 0, OFFSET + offset * curRow);
-            Normals[i] = Vector3.up;
-            vControllers[i].transform.position = Vertices[i];
         }
-        DrawTris(curRes, curRes);
-        Recalc(TheMesh.vertices, TheMesh.normals, TheMesh, vControllers, curRes, curRes);
+        DrawTris(wRes, hRes);
+        Recalc(TheMesh.vertices, TheMesh.normals, wRes, hRes, TheMesh, vControllers);
     }
 
     void DrawTris(int width, int height)
@@ -113,7 +129,6 @@ public class TextureMesh : MonoBehaviour
         }
         TheMesh.vertices = Vertices;
         TheMesh.triangles = Tris;
-        TheMesh.normals = Normals;
     }
 
     #endregion
@@ -128,7 +143,7 @@ public class TextureMesh : MonoBehaviour
             {
                 for (int i = 0; i < RES_MAX * RES_MAX; i++)
                 {
-                    if(i < curRes * curRes)
+                    if(i < wRes * hRes)
                     {
                         vControllers[i].SetActive(true);
                     } else
@@ -148,7 +163,7 @@ public class TextureMesh : MonoBehaviour
 
     public void HideVertices()
     {
-        for(int i = 0; i < curRes * curRes; i++)
+        for(int i = 0; i < wRes * hRes; i++)
         {
             vControllers[i].SetActive(false);
         }
@@ -227,76 +242,83 @@ public class TextureMesh : MonoBehaviour
         }
     }
 
-    public void Recalc(Vector3[] v, Vector3[] n, Mesh theMesh, List<GameObject> vertControllers, int meshWidth, int meshHeight)
+    void Recalc(Vector3[] vertices, Vector3[] normals, int width, int height, Mesh theMesh, List<GameObject> vertControllers)
     {
-        Vector3 nextN = Vector3.zero;
-
-        Vector3[] TriNorm = new Vector3[(meshWidth - 1) * (meshHeight - 1) * 2];
-        Vector3 a, b;
-        int tNdx = 0, curRow = 0;
-        // Move vertices to controller position.
-        for (int i = 0; i < v.Length; i++)
+        int numTriangles = (width - 1) * (height - 1) * 2;
+        Vector3[] triangleNormals = new Vector3[numTriangles];
+        int[] triangleMapping = theMesh.triangles;
+        int verticeIdx = 0;
+        for (int tri = 0; tri < triangleNormals.Length; tri++)
         {
-            v[i] = vertControllers[i].transform.position;
+        triangleNormals[tri] = 
+            FaceNormal(vertices, triangleMapping[verticeIdx], triangleMapping[verticeIdx+1], triangleMapping[verticeIdx+2]);
+        verticeIdx += 3;
+        }
+        
+        int edgePt = 0;
+        int trianglesPerRow = numTriangles / (height - 1);
+        for (int tri = 0; tri < normals.Length; tri++)
+        {
+        int nextPt = edgePt + 1;
+        // first and last triangle
+        if (edgePt == 0 || edgePt == trianglesPerRow * (height) - 1)
+        {
+            Vector3 tri1 = edgePt == 0 ?
+            (triangleNormals[edgePt] + triangleNormals[edgePt + 1]).normalized
+            : (triangleNormals[edgePt - trianglesPerRow] + triangleNormals[edgePt - 1 - trianglesPerRow]);
+            normals[tri] = tri1;
+        }
+        // top left and bottom right corner
+        else if ((edgePt == trianglesPerRow - 1) || (edgePt == trianglesPerRow * (height - 1)))
+        {
+            int tri1 = edgePt == trianglesPerRow - 1 ?
+            edgePt
+            : edgePt - trianglesPerRow;
+            normals[tri] = (triangleNormals[tri1]).normalized;
+        }
+        // left and right edges
+        else if (edgePt % trianglesPerRow == 0 || nextPt % trianglesPerRow == 0)
+        {
+            bool isLeft = edgePt % trianglesPerRow == 0;
+            normals[tri] = isLeft ?
+            (triangleNormals[edgePt] + triangleNormals[edgePt + 1] + triangleNormals[edgePt - trianglesPerRow]).normalized
+            : (triangleNormals[edgePt] + triangleNormals[edgePt - trianglesPerRow] + triangleNormals[edgePt - trianglesPerRow - 1]).normalized;
+        }
+        // top and bottom edges
+        else if ((0 < edgePt && edgePt < trianglesPerRow) || ((trianglesPerRow * (height)) - trianglesPerRow < edgePt && edgePt < trianglesPerRow * height))
+        {
+            bool isBottom = (0 < tri && tri < width);
+            int tri1 = isBottom ?
+            edgePt : edgePt - trianglesPerRow;
+            normals[tri] = (triangleNormals[tri1] + triangleNormals[tri1 + 1] + triangleNormals[tri1 + 2]).normalized;
+            edgePt++;
+        }
+        // everything else
+        else
+        {
+            normals[tri] =
+            (triangleNormals[edgePt] + triangleNormals[edgePt + 1]
+            + triangleNormals[edgePt + 2] + triangleNormals[edgePt - trianglesPerRow]
+            + triangleNormals[edgePt - trianglesPerRow - 1]
+            + triangleNormals[edgePt - trianglesPerRow + 1]).normalized;
+            edgePt++;
+        }
+        edgePt++;
         }
 
-        for(int i = 0; i < TriNorm.Length; i++)
+        theMesh.normals = normals;
+        for(int i = 0; i < theMesh.normals.Length; i++)
         {
-            if(tNdx * 2 < TriNorm.Length)
-            {
-                curRow = i / (meshHeight - 1);
-                a = v[curRow + tNdx + meshHeight + 1] - v[curRow + tNdx + meshWidth];
-                b = v[curRow + tNdx] - v[curRow + tNdx + meshWidth];
-                TriNorm[tNdx * 2] = Vector3.Cross(a, b).normalized;
-
-                a = v[curRow + tNdx + meshHeight + 1] - v[curRow + tNdx];
-                b = v[curRow + tNdx + 1] - v[curRow + tNdx];
-                TriNorm[tNdx * 2 + 1] = Vector3.Cross(a, b).normalized;
-                tNdx++;
-            }
+            vertices[i] = vertControllers[i].transform.localPosition;
+            vertControllers[i].transform.up = theMesh.normals[i];
         }
-        for (int i = 0; i < n.Length; i++)
-        {
-            nextN = Vector3.zero;
-            tNdx = i;
-            curRow = 0;
+        theMesh.vertices = vertices;
+    }
 
-            while(tNdx > (meshHeight - 1))
-            {
-                tNdx -= meshHeight;
-                curRow++;
-            }
-
-            if (curRow < meshWidth - 1 && tNdx % meshWidth < meshWidth - 1)
-            {
-                nextN = nextN + TriNorm[(2 * tNdx + ((meshWidth - 1) * 2) * curRow)] 
-                    + TriNorm[((2 * tNdx + ((meshWidth - 1) * 2) * curRow) + 1)];
-                //Debug.Log((2 * tNdx + ((meshWidth-1) * 2) * curRow));
-                //Debug.Log((2 * tNdx + ((meshWidth-1) * 2) * curRow) + 1);
-            }
-            if(curRow > 0 && tNdx % meshWidth > 0)
-            {
-                nextN = nextN + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1))] 
-                    + TriNorm[2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)) + 1];
-                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)));
-                //Debug.Log(2 * (tNdx - 1 + (curRow - 1) * (meshWidth - 1)) + 1);
-            }
-            if(curRow < meshWidth - 1 && tNdx % meshWidth > 0)
-            {
-                nextN = nextN + TriNorm[2 * (tNdx - 1 + curRow * (meshWidth - 1)) + 1];
-                //Debug.Log(2 * (tNdx - 1 + curRow * (meshWidth - 1)) + 1);
-            }
-            if(curRow > 0 && tNdx % meshWidth < meshWidth - 1)
-            {
-                nextN = nextN + TriNorm[2 * (tNdx + (meshWidth - 1) * (curRow - 1))];
-                //Debug.Log(2 * (tNdx + (meshWidth - 1) * (curRow - 1)));
-            }
-
-            n[i] = nextN.normalized;
-            vertControllers[i].transform.up = n[i];
-        }
-
-        theMesh.vertices = v;
-        theMesh.normals = n;
+    Vector3 FaceNormal(Vector3[] vertices, int triPt1, int triPt2, int triPt3)
+    {
+        Vector3 a = vertices[triPt2] - vertices[triPt1];
+        Vector3 b = vertices[triPt3] - vertices[triPt1];
+        return Vector3.Cross(a, b).normalized;
     }
 }

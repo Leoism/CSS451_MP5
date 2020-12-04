@@ -31,7 +31,6 @@ public class MainCam : MonoBehaviour
     void Start()
     {
         Debug.Assert(LookPoint != null);
-        LookPoint.localPosition = Vector3.zero;
     }
 
     // Update is called once per frame
