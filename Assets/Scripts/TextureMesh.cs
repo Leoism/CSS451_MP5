@@ -23,13 +23,15 @@ public class TextureMesh : MonoBehaviour
     Vector3 mouseDown = Vector3.zero;
     Vector3 dPos = Vector3.zero;
 
-    public SliderWithEcho dRes = null;
+    public SliderWithEcho wResSlider = null;
+    public SliderWithEcho hResSlider = null;
     const int RES_MIN = 2;
     const int RES_MAX = 20;
 
     const float LENGTH = 10f;
     const float OFFSET = -5f;
-    int curRes;
+    int hRes = 5;
+    int wRes = 5;
 
     bool isActive = false;
 
@@ -41,7 +43,8 @@ public class TextureMesh : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(dRes != null);
+        Debug.Assert(hResSlider != null);
+        Debug.Assert(wResSlider != null);
         TheMesh = GetComponent<MeshFilter>().mesh;
         TheMesh.Clear();
 
@@ -50,9 +53,12 @@ public class TextureMesh : MonoBehaviour
             GameObject g = Instantiate(Resources.Load("Prefabs/Vertices/MeshVertex")) as GameObject;
             vControllers.Add(g);
         }
-        dRes.InitSliderRange(RES_MIN, RES_MAX, 5);
 
-        dRes.SetSliderListener(SetVerticies);    
+        wResSlider.InitSliderRange(RES_MIN, RES_MAX, 5);
+        hResSlider.InitSliderRange(RES_MIN, RES_MAX, 5);
+
+        wResSlider.SetSliderListener(SetWidth);    
+        hResSlider.SetSliderListener(SetHeight);
     }
 
     // Update is called once per frame
@@ -60,37 +66,47 @@ public class TextureMesh : MonoBehaviour
     {
         ShowVertices();
         MouseSupport();
-        Recalc(TheMesh.vertices, TheMesh.normals, curRes, curRes, TheMesh, vControllers);
+        Recalc(TheMesh.vertices, TheMesh.normals, wRes, hRes, TheMesh, vControllers);
     }
 
     #region DRAW_MESH
 
-    void SetVerticies(float v)
+    void SetWidth(float width)
+    {
+        wRes = (int)width;
+        SetVerticies(wRes, hRes);
+    }
+
+    void SetHeight(float height)
+    {
+        hRes = (int)height;
+        SetVerticies(wRes,hRes);
+    }
+    void SetVerticies(float width, float height)
     {
         TheMesh.Clear();
         AxisFrame.gameObject.SetActive(false);
         isActive = false;
-        curRes = (int)v;
-        Vertices = new Vector3[curRes * curRes];
-        Normals = new Vector3[curRes * curRes];
+        wRes = (int)width;
+        hRes = (int)height;
+        Vertices = new Vector3[wRes * hRes];
+        Normals = new Vector3[wRes * hRes];
 
-        float offset = LENGTH / (curRes - 1);
-        int curRow = 0, temp = 0;
-        for(int i = 0; i < Vertices.Length; i++)
+        float wOffset = LENGTH / (wRes - 1);
+        float hOffset = LENGTH / (hRes - 1);
+        int idx = 0;
+
+        for (int i = 0; i < hRes; i++)
         {
-            temp = i;
-            curRow = 0;
-            while(temp > curRes - 1)
-            {
-                temp -= curRes;
-                curRow++;
+            for (int j = 0; j < wRes; j++) {
+                Vertices[idx] = new Vector3((float)(-1 + (j * wOffset)), 0, (float)(-1 + (i * hOffset)));
+                Normals[idx] = Vector3.up;
+                vControllers[idx].transform.localPosition = Vertices[idx];
+                idx++;
             }
-            Vertices[i] = new Vector3(OFFSET + offset * (temp % curRes), 0, OFFSET + offset * curRow);
-            Normals[i] = Vector3.up;
-            vControllers[i].transform.position = Vertices[i];
         }
-        DrawTris(curRes, curRes);
-        Recalc(TheMesh.vertices, TheMesh.normals, curRes, curRes, TheMesh, vControllers);
+        DrawTris(wRes, hRes);
+        Recalc(TheMesh.vertices, TheMesh.normals, wRes, hRes, TheMesh, vControllers);
     }
 
     void DrawTris(int width, int height)
@@ -113,7 +129,6 @@ public class TextureMesh : MonoBehaviour
         }
         TheMesh.vertices = Vertices;
         TheMesh.triangles = Tris;
-        TheMesh.normals = Normals;
     }
 
     #endregion
@@ -128,7 +143,7 @@ public class TextureMesh : MonoBehaviour
             {
                 for (int i = 0; i < RES_MAX * RES_MAX; i++)
                 {
-                    if(i < curRes * curRes)
+                    if(i < wRes * hRes)
                     {
                         vControllers[i].SetActive(true);
                     } else
@@ -148,7 +163,7 @@ public class TextureMesh : MonoBehaviour
 
     public void HideVertices()
     {
-        for(int i = 0; i < curRes * curRes; i++)
+        for(int i = 0; i < wRes * hRes; i++)
         {
             vControllers[i].SetActive(false);
         }
