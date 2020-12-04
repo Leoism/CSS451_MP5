@@ -71,9 +71,9 @@ public class Main : MonoBehaviour
             } else
             {
                 mainCamera.transform.localPosition =
-                    new Vector3(0, 3, -12);
+                    new Vector3(4.2f, 4.2f, -12);
                 lookAt.localPosition =
-                    new Vector3(0, -1.7f, 7);
+                    new Vector3(4.2f, 0, 2.8f);
                 cylinderMesh.SetSelect(false);
             }
         }
