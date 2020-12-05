@@ -6,6 +6,12 @@ using UnityEngine.EventSystems;
 
 public class TextureMesh : MonoBehaviour
 {
+    public float rotation = 0f;
+    public float scaleX = 1f;
+    public float scaleZ = 1f;
+    public float translateX = 0f;
+    public float translateZ = 0f;
+
     List<GameObject> vControllers = new List<GameObject>();
     Vector3[] Vertices;
     Vector3[] Normals;
@@ -67,7 +73,58 @@ public class TextureMesh : MonoBehaviour
         ShowVertices();
         MouseSupport();
         Recalc(TheMesh.vertices, TheMesh.normals, wRes, hRes, TheMesh, vControllers);
+        Vector2 T = new Vector2(translateX, translateZ);
+        Vector2 S = new Vector2(scaleX, scaleZ);
+        Vector2[] uv = TheMesh.uv;
+        for(int i = 0; i < TheMesh.uv.Length; i++)
+        {
+            uv[i] += Matrix3x3Helpers.CreateTRS(T, rotation, S) * uv[i];
+        }
+        TheMesh.uv = uv;
     }
+
+    public void SetT(Vector2 t)
+    {
+        translateX = t.x * 20;
+        translateZ = t.y * 20;
+        Vector2 T = new Vector2(translateX, translateZ);
+        Vector2[] uv = TheMesh.uv;
+        for (int i = 0; i < uv.Length; i++)
+        {
+            uv[i] += Matrix3x3Helpers.CreateTranslation(T) * uv[i];
+        }
+        TheMesh.uv = uv;
+    }
+
+    public Vector2 GetT() { return new Vector2(translateX, translateZ); }
+
+    public void SetR(float r)
+    {
+        rotation = r;
+        Vector2[] uv = TheMesh.uv;
+        for (int i = 0; i < uv.Length; i++)
+        {
+            uv[i] += Matrix3x3Helpers.CreateRotation(rotation) * uv[i];
+        }
+        TheMesh.uv = uv;
+    }
+
+    public float getR() { return rotation; }
+
+    public void SetS(Vector2 s)
+    {
+        scaleX = s.x;
+        scaleZ = s.y;
+        Vector2 S = new Vector2(scaleX, scaleZ);
+        Vector2[] uv = TheMesh.uv;
+        for (int i = 0; i < uv.Length; i++)
+        {
+            uv[i] += Matrix3x3Helpers.CreateScale(S) * uv[i];
+        }
+        TheMesh.uv = uv;
+    }
+
+    public Vector2 GetS() { return new Vector2(scaleX, scaleZ); }
 
     #region DRAW_MESH
 
@@ -242,6 +299,16 @@ public class TextureMesh : MonoBehaviour
         }
     }
 
+    void LoadUVs(Vector3[] vertices, Mesh theMesh)
+    {
+        Vector2[] calcUV = new Vector2[vertices.Length];
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            calcUV[i] = new Vector2(vertices[i].x, vertices[i].z);
+        }
+        theMesh.uv = calcUV;
+    }
+
     void Recalc(Vector3[] vertices, Vector3[] normals, int width, int height, Mesh theMesh, List<GameObject> vertControllers)
     {
         int numTriangles = (width - 1) * (height - 1) * 2;
@@ -313,6 +380,7 @@ public class TextureMesh : MonoBehaviour
             vertControllers[i].transform.up = theMesh.normals[i];
         }
         theMesh.vertices = vertices;
+        LoadUVs(vertices, theMesh);
     }
 
     Vector3 FaceNormal(Vector3[] vertices, int triPt1, int triPt2, int triPt3)

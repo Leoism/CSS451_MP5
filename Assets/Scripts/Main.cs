@@ -28,7 +28,7 @@ public class Main : MonoBehaviour
         Debug.Assert(mainCamera != null);
         Debug.Assert(lookAt != null);
 
-        meshXform.SetSelected(TheMesh.gameObject.transform);
+        // meshXform.SetSelected(TheMesh.gameObject.transform);
         mSelectMenuOptions.Add(new Dropdown.OptionData("Mesh"));
         mSelectMenuOptions.Add(new Dropdown.OptionData("Cylinder"));
         mSelectedTransform.Add(TheMesh.gameObject.transform);

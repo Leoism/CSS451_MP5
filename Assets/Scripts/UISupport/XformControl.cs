@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 
 public class XformControl : MonoBehaviour
 {
+    public TextureMesh mesh = null;
     public Toggle T, R, S;
     public SliderWithEcho X, Y, Z;
     public Text ShowName = null;
@@ -60,11 +61,11 @@ public class XformControl : MonoBehaviour
     {
         if (v)
         {
-            Vector3 p = ReadXform();
+            Vector2 p = mesh.GetT();
             prevSliderVal = p;
             X.InitSliderRange(POS_MIN, POS_MAX, p.x);
             Y.InitSliderRange(POS_MIN, POS_MAX, p.y);
-            Z.InitSliderRange(POS_MIN, POS_MAX, p.z);
+            Z.InitSliderRange(0, 0, 0);
         }
     }
 
@@ -72,12 +73,12 @@ public class XformControl : MonoBehaviour
     {
         if (v)
         {
-            Vector3 r = ReadXform();
-            prevSliderVal = r;
+            float r = mesh.getR();
+            prevSliderVal = new Vector3(0, 0, r);
             X.InitSliderRange(0, 0, 0);
             Y.InitSliderRange(0, 0, 0);
-            Z.InitSliderRange(ROTATION_MIN, ROTATION_MAX, r.z);
-            prevSliderVal = r;
+            Z.InitSliderRange(ROTATION_MIN, ROTATION_MAX, r);
+            prevSliderVal = new Vector3(0, 0, r);
         }
     }
 
@@ -85,11 +86,11 @@ public class XformControl : MonoBehaviour
     {
         if (v)
         {
-            Vector3 s = ReadXform();
+            Vector3 s = mesh.GetS();
             prevSliderVal = s;
             X.InitSliderRange(SCALE_MIN, SCALE_MAX, s.x);
             Y.InitSliderRange(SCALE_MIN, SCALE_MAX, s.y);
-            Z.InitSliderRange(1f, 1f, 1f);
+            Z.InitSliderRange(0, 0, 0);
         }
     }
     #endregion
@@ -97,32 +98,37 @@ public class XformControl : MonoBehaviour
     #region RESPOND_SLIDER_CHANGE
     void ChangeX(float v)
     {
-        Vector3 p = ReadXform();
-        float dx = v - prevSliderVal.x;
-        prevSliderVal.x = v;
-        Quaternion q = Quaternion.AngleAxis(dx, Vector3.right);
-        p.x = v;
-        UISetXform(ref p, ref q);
+        
+        if (T.isOn)
+        {
+            Vector2 t = new Vector2(v, Y.GetValue());
+            mesh.SetT(t);
+        } else if (S.isOn) 
+        {
+            Vector2 s = new Vector2(v, Y.GetValue());
+            mesh.SetS(s);
+        }
     }
 
     void ChangeY(float v)
     {
-        Vector3 p = ReadXform();
-        float dy = v - prevSliderVal.y;
-        prevSliderVal.y = v;
-        Quaternion q = Quaternion.AngleAxis(dy, Vector3.up);
-        p.y = v;
-        UISetXform(ref p, ref q);
+        if (T.isOn)
+        {
+            Vector2 t = new Vector2(X.GetValue(), v);
+            mesh.SetT(t);
+        } else if (S.isOn) 
+        {
+            Vector2 s = new Vector2(X.GetValue(), v);
+            mesh.SetS(s);
+        }
     }
 
     void ChangeZ(float v)
     {
-        Vector3 p = ReadXform();
-        float dz = v - prevSliderVal.z;
-        prevSliderVal.z = v;
-        Quaternion q = Quaternion.AngleAxis(dz, Vector3.forward);
-        p.z = v;
-        UISetXform(ref p, ref q);
+        if (R.isOn)
+        {
+            mesh.SetR(v);
+        }
     }
     #endregion
 
