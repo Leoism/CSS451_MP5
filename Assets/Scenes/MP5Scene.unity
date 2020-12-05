@@ -313,7 +313,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5db6593f0e5a28f49a32bb48cec4beb2, type: 2}
+  - {fileID: 2100000, guid: f5889d74378a6f44fab1c2768602f9d8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -368,6 +368,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a37e8f52443c8fa40b892b301f688f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rotation: 0
+  scaleX: 1
+  scaleZ: 1
+  translateX: 0
+  translateZ: 0
   AxisFrame: {fileID: 1445058959}
   wResSlider: {fileID: 1190062316}
   hResSlider: {fileID: 1861389353}
@@ -1456,6 +1461,11 @@ PrefabInstance:
       propertyPath: selected
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 4062938375810314930, guid: 6fc0fd3ff5adeef439febc400f591bb1,
+        type: 3}
+      propertyPath: mesh
+      value: 
+      objectReference: {fileID: 275263565}
     - target: {fileID: 5404039808505922625, guid: 6fc0fd3ff5adeef439febc400f591bb1,
         type: 3}
       propertyPath: m_AnchorMax.y
